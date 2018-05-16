@@ -18,18 +18,18 @@ const urlStruct = {
 const onRequest = (request, response) => {
   console.log(request.url);
 
-  //Parse url, grab path and params
+  // Parse url, grab path and params
   const parsedUrl = url.parse(request.url);
   const params = query.parse(parsedUrl.query);
   const path = parsedUrl.pathname;
 
-  //Call methods that don't require parans
-  if(path === "/" || path === "/style.css" || path === "/getUsers") {
+  // Call methods that don't require parans
+  if (path === '/' || path === '/style.css' || path === '/getUsers') {
     urlStruct[path](request, response);
     return;
   }
 
-  //Call methods requiring params
+  // Call methods requiring params
   if (urlStruct[path]) {
     urlStruct[path](request, response, params);
   } else {
