@@ -3,9 +3,110 @@
 <head>
   <title>Our simple HTTP server</title>
   <link rel="stylesheet" type="text/css" href="/style.css">
-  
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.34/browser.min.js"></script>
   <script type="text/babel">
+
+  //Convert xhr status to its header name
+  const getStatus = (xhr) => {
+    switch(xhr.status) {
+      case 200:
+      return "Success";
+      break;
+      case 201:
+      return 'Create';
+      break;
+      case 204:
+      return 'Updated (No Content)';
+      break;
+      case 400:
+      return 'Bad Request';
+      break;
+      case 404:
+      return 'Resource Not Found';
+      break;
+      default:
+      return 'Error code not implemented';
+      break;
+    }
+  };
+
+  const handleResponse = (xhr) => {
+    const contentBox = document.querySelector('#content');
+    contentBox.innerHTML = "";
+
+    const type = xhr.getResponseHeader('content-type');
+
+    //Status Code Name
+    const h1 = document.createElement('h1');
+    //Returned Message
+    const p = document.createElement('p');
+
+    //Parse returned JSON object
+    h1.textContent = getStatus(xhr);
+    contentBox.appendChild(h1);
+
+    //Set the paragraph content based on the response message
+    if(xhr.response) {
+      const obj = JSON.parse(xhr.response);
+      console.dir(obj);
+
+      if(obj.message){
+        p.textContent = `Message: ${obj.message}`;
+      } else if (obj.users) {
+        const usersString = JSON.stringify(obj.users);
+        p.textContent = usersString;
+      }
+      contentBox.appendChild(p);
+    }
+  };
+
+  const addUserRequest = (e) => {
+    //Grab name and age value
+    const name = document.getElementById('nameField').value;
+    const age = document.getElementById('ageField').value;
+    //Create path with name and age
+    const path = `/addUser?name=${name}&age=${age}`;
+
+    //Make post request
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', path);
+    xhr.onload = () => handleResponse(xhr);
+    xhr.send();
+
+    e.preventDefault();
+    return false;
+  };
+
+  const headGetRequest = (e) => {
+    //Grab url and method type values
+    const urlSelect = document.getElementById('urlField');
+    const url = urlSelect.options[urlSelect.selectedIndex].value;
+    const mtdSelect = document.getElementById('methodSelect');
+    const method = mtdSelect.options[mtdSelect.selectedIndex].value;
+
+    //Make get/head request
+    const xhr = new XMLHttpRequest();
+    xhr.open(method, url);
+    xhr.onload = () => handleResponse(xhr);
+    xhr.send();
+
+    e.preventDefault();
+    return false;
+  };
+
+  const init = () => {
+    const addForm = document.getElementById('nameForm');
+    const getForm = document.getElementById('userForm');
+
+    const addUser = (e) => addUserRequest(e);
+    const headGet = (e) => headGetRequest(e);
+
+    addForm.addEventListener("submit", addUser);
+    getForm.addEventListener("submit", headGet);
+  };
+
+  window.onload = init;
 
   </script>
 </head>
